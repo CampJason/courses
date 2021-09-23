@@ -3,65 +3,96 @@
 import json
 todolist = {}
 mark = 'DONE!'
+norm_numb = '1,2,3,4,5,6,7,8,9,0'
+save_list = []
+
+def yes_no_dec(func):
+    def wrapper(*args,**kvargs):
+        while True:
+            result  = func(*args,**kvargs)
+            print('Successfully!')
+            print_task()
+            if not yes_no_todo_choice():
+                break
+        return result
+    return wrapper
+
+def succ_dec(func):
+    def wrapper(*args, **kvargs):
+        result = func (*args, **kvargs)
+        print('Successfully!')
+        print_task()
+        return result
+    return wrapper
 
 def add_list(number, task):
     todolist[number] = [task]
     return todolist
 
+@yes_no_dec
 def print_add_list():
-    number = input('Input task number: ')
-    if number in todolist:
-        print('There is already one, choose another.')
-    task = input('Input task: ')
-    add_list(number, task)
-    print('Successfully!')
-    print_task()
+    while True:
+        number = input('Input task number: ')
+        if number not in norm_numb:
+            print('Only numbers')
+            break
+        task = input('Input task: ')
+        return add_list(number, task)
 
 def print_task():
-    print('Yours Task: ')
-    print(todolist)
+    print('Yours Task:')
+    for i in todolist:
+        val = todolist[i]
+        print(i, '-', val)
 
+@yes_no_dec
 def delet_task():
-    del_nub = input('Input number task for delete: ')
-    todolist.pop(del_nub)
-    print('Successfully!')
-    print_task()
-    return todolist
+    while True:
+        del_nub = input('Input number task for delete: ')
+        if del_nub not in todolist:
+            print('There is no task with this number. ')
+            break
+        todolist.pop(del_nub)
+        return todolist
 
+@yes_no_dec
 def mark_task():
-    mark_num = input('Input task number for mark: ')
-    mark_number = todolist[mark_num]
-    mark_number.append(mark)
-    todolist[mark_num] = mark_number
-    print('Successfully!')
-    print_task()
-    return todolist
+    while True:
+        mark_num = input('Input task number for mark: ')
+        if mark_num not in todolist:
+            print('There is no task with this number. ')
+            break
+        mark_number = todolist[mark_num]
+        mark_number.append(mark)
+        todolist[mark_num] = mark_number
+        return todolist
 
+@yes_no_dec
 def del_mark_task():
-    mark_num = input('Input task number for delete mark: ')
-    del todolist[mark_num][1]
-    print('Successfully!')
-    print_task()
-    return todolist
-    
+    while True:
+        mark_num = input('Input task number for delete mark: ')
+        if mark_num not in todolist:
+            print('There is no task with this number. ')
+            break
+        del todolist[mark_num][1]
+        return todolist
+
+@succ_dec   
 def all_mark():
     for value in todolist:
         temp_value = todolist[value]
         if mark not in temp_value:
             temp_value.append(mark)
             todolist[value] = temp_value
-            print('Successfully!')
-    print_task()
     return todolist
 
+@succ_dec
 def del_all_mark():
     for all_mark in todolist:
         temp_value = todolist[all_mark]
         if mark in temp_value:
             del temp_value[1]
             todolist[all_mark] = temp_value
-            print('Successfully!')
-            print_task()
     return todolist
 
 def check_mark_done():
@@ -92,16 +123,30 @@ def find_task():
 
 def save_and_exit():
     name_list = input('Enter your file names:  ')
+    save_list.append(name_list)
+    with open('save_list.json', 'w') as savelist:
+        json.dump(save_list, savelist)
     with open(name_list+'.json', 'w') as savefile:
         json.dump(todolist, savefile)
         print('Successfully! Good day!') 
         exit()
 
+def show_save_list():
+    print('Your Save file:')
+    with open('save_list.json', 'r+') as loadlist:
+        data_s=json.load(loadlist)
+        save_list.append(data_s)
+    print(save_list)
+
 def only_exit():
     print('Good Day!')
     exit()
 
-def  load_file():
+def load_file():
+    with open('save_list.json', 'r+') as loadlist:
+        data_s=json.load(loadlist)
+        save_list.append(data_s)
+    print('Saved files: ', save_list)
     name = input('Enter file names: ')
     with open(name+'.json', 'r+') as loadfile:
         data=json.load(loadfile)
@@ -111,6 +156,10 @@ def  load_file():
 def load_todolist():
     global todolist
     todolist = load_file()
+
+def yes_no_todo_choice():
+     y = input(f'Do you want to another one? (y/n) ')
+     return y in ('y', 'Y')
 
 choices = {
      "1": print_add_list,
@@ -125,7 +174,8 @@ choices = {
      "10": find_task,
      "11": save_and_exit,
      "12": load_todolist,
-     "13": only_exit
+     "13": only_exit,
+     "14": show_save_list
      }
 
 menu = """
@@ -142,6 +192,7 @@ menu = """
 11. Save and Exit.
 12. Load list.
 13. Exit.
+14. Show Save list.
 
 """
 
